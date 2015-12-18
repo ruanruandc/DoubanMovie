@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="@dimen/nav_header_height"
+    android:background="@color/douban_movie"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    android:orientation="vertical"
+    android:gravity="bottom">
+    <LinearLayout
+        android:id="@+id/layout_left"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_marginRight="10dp">
+        <ImageView android:layout_width="50dp" android:layout_height="50dp"
+            android:src="@mipmap/douban_movie"
+            android:scaleType="fitXY"
+            android:id="@+id/imageView"
+            />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingTop="@dimen/nav_header_vertical_spacing" android:text="未登录"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:id="@+id/naviga_tv_name"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="点击登录" android:id="@+id/textView"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_margin="20dp"
+
+        android:layout_toRightOf="@id/layout_left">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/user_id"
+                android:textSize="12sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:text="用户ID:"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:id="@+id/tv_userid"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:layout_toRightOf="@id/user_id"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/add_time"
+                android:textSize="12sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:text="加入时间:"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:id="@+id/tv_addtime"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:layout_toRightOf="@id/add_time"/>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/location"
+                android:textSize="12sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:text="居住地:"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:id="@+id/tv_location"
+                android:textSize="12sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:layout_toRightOf="@id/location"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+
+
+</RelativeLayout>

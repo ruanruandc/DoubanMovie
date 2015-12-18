@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference android:title="使用移动网络"
+        android:key="use_mobile"
+        android:defaultValue="false"/>
+    <SwitchPreference android:title="滑动时加载图片"
+        android:key="swipe_load_image"
+        android:defaultValue="true"/>
+    <ListPreference
+        android:title="图片质量"
+        android:key="imageQuality"
+        android:entries="@array/imageQuality"
+        android:entryValues="@array/image_quality_value"
+        android:defaultValue="0"/>
+    <ListPreference
+        android:title="头像质量"
+        android:key="logoQuality"
+        android:entries="@array/imageQuality"
+        android:entryValues="@array/image_quality_value"
+        android:defaultValue="0"/>
+    <Preference android:title="清空缓存"
+        android:summary=""
+        android:key="clear"/>
+
+</PreferenceScreen>

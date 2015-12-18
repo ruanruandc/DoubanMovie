@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:mContext=".MainActivity">
+    <item android:id="@+id/action_clear" android:title="@string/action_clear"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_search"
+        android:title="search"
+        android:icon="@drawable/ic_action_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"
+        />
+    <item android:id="@+id/location"
+        android:title="定位"
+        app:showAsAction="always"/>
+    <item android:id="@+id/test"
+        android:title="test"
+        app:showAsAction="always"
+        android:visible="false"/>
+</menu>
