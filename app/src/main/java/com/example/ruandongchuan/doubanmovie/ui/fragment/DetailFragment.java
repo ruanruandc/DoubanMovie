@@ -80,6 +80,8 @@ public class DetailFragment extends AbstractFragment {
     @Override
     public void OnSuccess(String result, int tag) {
         LogTool.i("result"+String.valueOf(DoubanApi.isAuthed), result);
+        if (!isAdded())
+            return;
         if (result.isEmpty())
             return;
         if (tag == DoubanApi.GET_SUBJECT){
@@ -88,12 +90,14 @@ public class DetailFragment extends AbstractFragment {
             DownLoadThread thread = new DownLoadThread(bean.getImages().getLarge(), new OnCallBack<File>() {
                 @Override
                 public void callBack(File file) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("text", "《" + bean.getTitle() + "》" +
-                            getString(R.string.from_douban_movie) + bean.getAlt());
-                    bundle.putSerializable("image", file);
-                    if (onCallBack != null) {
-                        onCallBack.callBack(bundle);
+                    if (isAdded()){
+                        Bundle bundle = new Bundle();
+                        bundle.putString("text", "《" + bean.getTitle() + "》" +
+                                getString(R.string.from_douban_movie) + bean.getAlt());
+                        bundle.putSerializable("image", file);
+                        if (onCallBack != null) {
+                            onCallBack.callBack(bundle);
+                        }
                     }
                 }
             });

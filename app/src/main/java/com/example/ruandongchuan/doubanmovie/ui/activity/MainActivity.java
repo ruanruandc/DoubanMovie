@@ -2,9 +2,10 @@ package com.example.ruandongchuan.doubanmovie.ui.activity;
 
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -14,8 +15,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
 import android.provider.SearchRecentSuggestions;
-import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
@@ -23,7 +26,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -35,6 +37,7 @@ import android.widget.Toast;
 
 import com.example.ruandongchuan.doubanmovie.R;
 import com.example.ruandongchuan.doubanmovie.constants.DoubanApi;
+import com.example.ruandongchuan.doubanmovie.service.LocalService;
 import com.example.ruandongchuan.doubanmovie.ui.adapter.FragmentPagerAdapterImpl;
 import com.example.ruandongchuan.doubanmovie.ui.fragment.OnShowFragment;
 import com.example.ruandongchuan.doubanmovie.ui.fragment.TopFragment;
@@ -44,7 +47,7 @@ import com.example.ruandongchuan.doubanmovie.util.LogTool;
 import com.example.ruandongchuan.doubanmovie.util.MySuggestionProvider;
 import com.example.ruandongchuan.doubanmovie.util.interfaces.OnCallBack;
 
-import java.util.List;
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends AbstractActivity implements NavigationView.OnNavigationItemSelectedListener{
     private ViewPager mViewPager;
@@ -62,7 +65,33 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
     private SharedPreferences mSharedPreferences;
     private NavigationView mNavigationView;
     private Toolbar toolbar;
-    private boolean isDark = false,isLogin = false;
+    private boolean isDark = false,isLogin = false, isLocateSuccess = false;
+    private MainHandler mHandler = new MainHandler(this);
+
+    static class MainHandler extends Handler{
+        private WeakReference<MainActivity> instance;
+        public MainHandler(MainActivity activity) {
+            instance = new WeakReference<MainActivity>(activity);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            MainActivity activity = instance.get();
+            if (activity == null)
+                return;
+            switch (msg.what){
+                case 100:
+                    if (!activity.isLocateSuccess) {
+                        activity.stopLocalService();
+                        String city = activity.getString(R.string.default_location);
+                        activity.setTitle(city);
+                        activity.invalidateOptionsMenu();
+                        activity.onShowFragment.mHttpManager.getInTheaters(city);
+                    }
+                    break;
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +99,9 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
         setContentView(R.layout.activity_main_drawer);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        startLocalService();
         initView();
-        getLocation();
+        //getLocation();
         initData();
         updateNavigation();
     }
@@ -139,8 +169,6 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
                 if (!DoubanApi.isAuthed) {
                     Intent intent = new Intent(MainActivity.this, AuthActivity.class);
                     startActivityForResult(intent, 100);
-                } else {
-
                 }
             }
         });
@@ -151,14 +179,14 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
     }
 
     private void initData(){
+        registerReceiver();
         //提交经纬度
         onShowFragment = OnShowFragment.getInstance(la,lo);
         LogTool.i("activity_create", onShowFragment.toString());
         onShowFragment.setOnGetCity(new OnCallBack<String>() {
             @Override
             public void callBack(String s) {
-                located = s;
-                invalidateOptionsMenu();
+                setTitle(s);
             }
         });
         mAdapter = new FragmentPagerAdapterImpl(getSupportFragmentManager());
@@ -168,6 +196,7 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
         mAdapter.addFragment(getString(R.string.title_fragment_us_box), new UsBoxFragment());
         mViewPager.setAdapter(mAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
+        mHandler.sendEmptyMessageDelayed(100,3000);
         mToast = Toast.makeText(this, getString(R.string.exit_message), Toast.LENGTH_SHORT);
     }
 
@@ -194,8 +223,13 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
             }
         }
     }
+
+    private void setTitle(String city){
+        located = city;
+        invalidateOptionsMenu();
+    }
     //
-    private void getLocation() {
+    /*private void getLocation() {
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         String locationProvider = "";
         List<String> providers = mLocationManager.getProviders(true);
@@ -215,7 +249,7 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
                             dialog.dismiss();
                         }
                     }).create();
-            dialog.show();
+           // dialog.show();
         }
         if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
             locationProvider = LocationManager.NETWORK_PROVIDER;
@@ -268,19 +302,12 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
             Toast.makeText(getApplicationContext(),"no permission",Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
-    }
+    }*/
 
     //刷新经纬度，获取地理位置信息
     private void refresh(){
         onShowFragment = (OnShowFragment) mAdapter.getActiveFragment(mViewPager, 0);
         onShowFragment.update(la, lo);
-        onShowFragment.setOnGetCity(new OnCallBack<String>() {
-            @Override
-            public void callBack(String s) {
-                located = s;
-                invalidateOptionsMenu();
-            }
-        });
         LogTool.i("activity", onShowFragment.toString() + "--" + onShowFragment.toString());
     }
 
@@ -288,6 +315,8 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unRegisterReceiver();
+        stopLocalService();
         removeLocation();
         ImageLoader.getmInstance().clearMemeoryCache();
     }
@@ -379,8 +408,9 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
         //重新定位
         if (id == R.id.location){
             //Toast.makeText(getApplicationContext(),"location",Toast.LENGTH_SHORT).show();
-            getLocation();
-            refresh();
+            //getLocation();
+            //refresh();
+            startLocalService();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -439,5 +469,40 @@ public class MainActivity extends AbstractActivity implements NavigationView.OnN
         }
         mTabLayout.setBackgroundColor(isDark ? bg_dark : bg_nomal);
         mNavigationView.setItemTextColor(ColorStateList.valueOf(isDark ? bg_white : Color.BLACK));
+    }
+
+    private void startLocalService(){
+        startService(new Intent(this, LocalService.class));
+    }
+
+    private void stopLocalService(){
+        stopService(new Intent(this,LocalService.class));
+    }
+
+    private BroadcastReceiver mLocationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            isLocateSuccess = true;
+            Bundle bundle = intent.getExtras();
+            if (bundle != null && bundle.getParcelable("location") != null){
+                LogTool.i("MainActivity", "mLocationReceiver");
+                Parcelable parcelables = bundle.getParcelable("location");
+                if (parcelables != null) {
+                    Location location = (Location) parcelables;
+                    la = String.valueOf(location.getLatitude());
+                    lo = String.valueOf(location.getLongitude());
+                    refresh();
+                }
+            }
+        }
+    };
+
+    private void registerReceiver(){
+        IntentFilter intentFilter = new IntentFilter(LocalService.LOCATION_RECEIVER);
+        registerReceiver(mLocationReceiver,intentFilter);
+    }
+
+    private void unRegisterReceiver(){
+        unregisterReceiver(mLocationReceiver);
     }
 }

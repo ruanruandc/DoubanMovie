@@ -2,6 +2,8 @@ package com.example.ruandongchuan.doubanmovie.ui.fragment;
 
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -23,8 +25,8 @@ import com.example.ruandongchuan.doubanmovie.ui.bean.InTheaterBean;
 import com.example.ruandongchuan.doubanmovie.util.HttpManager;
 import com.example.ruandongchuan.doubanmovie.util.ImageLoader.OnScrollPauseListener;
 import com.example.ruandongchuan.doubanmovie.util.LogTool;
-import com.example.ruandongchuan.doubanmovie.util.interfaces.OnCallBack;
 import com.example.ruandongchuan.doubanmovie.util.Util;
+import com.example.ruandongchuan.doubanmovie.util.interfaces.OnCallBack;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -48,6 +50,7 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
     private TextView tv_complete;
     private TextView tv_nomal;
     private LinearLayout loading_layout;
+
     public OnShowFragment() {
         // Required empty public constructor
     }
@@ -141,10 +144,11 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
         mRecycleView.setOnScrollListener(new OnScrollPauseListener());
     }
     public void initData(){
-        mHttpManager.getGeocoding(la, lo);
+        //mHttpManager.getGeocoding(la, lo);
     }
 
     public void update(String la,String lo){
+        LogTool.i("onshowFragment","la="+la+" lo="+lo);
         this.la = la;
         this.lo = lo;
         mHttpManager.getGeocoding(la, lo);
@@ -167,6 +171,7 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
             return;
         //正在上映
         if (tag == DoubanApi.GET_IN_THEATERS){
+            mData.clear();
             InTheaterBean bean = gson.fromJson(result, InTheaterBean.class);
             if (isRefresh){
                 mData.clear();
@@ -178,7 +183,7 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
             title_position = mData.size();
             mAdapter.notifyDataSetChanged();
             Util.loadAnima(mProgressBar, mRecycleView);
-            LogTool.i(tag+"",bean.getTitle());
+            LogTool.i("GET_IN_THEATERS",bean.getTitle());
         }
         //即将上映
         if (tag == DoubanApi.GET_COMMING_SOON){
@@ -193,10 +198,10 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
                     mRecycleView.smoothScrollToPosition(title_position);
                 }
             });
-
         }
         //根据经纬度获取城市信息
         if (tag == DoubanApi.GET_GEOCODING){
+            LogTool.i("onshowFragment","GET_GEOCODING="+result);
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 JSONObject jsonresult= jsonObject.getJSONObject("result");
@@ -219,8 +224,10 @@ public class OnShowFragment extends AbstractFragment implements HttpManager.OnCo
     @Override
     public void OnError(int tag) {
         if (tag == DoubanApi.GET_GEOCODING){
-            city = getString(R.string.default_location);
-            mHttpManager.getInTheaters(city);
+            if (isAdded()) {
+                city = getString(R.string.default_location);
+                mHttpManager.getInTheaters(city);
+            }
         }
     }
 }

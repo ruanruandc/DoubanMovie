@@ -35,7 +35,7 @@ public class DoubanApi {
     public static final String HTTP_SEARCH = HTTP_HOST + "/v2/movie/search";
     public static final String HTTP_USBOX = HTTP_HOST + "/v2/movie/us_box";
     public static final String HTTP_USERINFO = HTTP_HOST + "/v2/user/~me";
-    public static final String HTTP_COMMENT = "http://movie.douban.com/subject/";
+    public static final String HTTP_COMMENT = "https://movie.douban.com/subject/";
     //正在上映
     public static final int GET_IN_THEATERS = 100;
     //即将上映

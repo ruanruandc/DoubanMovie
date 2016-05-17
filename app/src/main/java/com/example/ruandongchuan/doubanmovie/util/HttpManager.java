@@ -29,7 +29,7 @@ public class HttpManager {
     private OnConnectListener onConnectListener;
     private String access_token;
     private final String apikey = "apikey="+DoubanApi.APIKEY;
-    private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36";
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36";
     public HttpManager(OnConnectListener onConnectListener){
         this.onConnectListener = onConnectListener;
     }
@@ -205,10 +205,10 @@ public class HttpManager {
      * @param tag 标志
      */
     public void getString(String url,int tag){
-        doGet(url,false,false,tag);
+        doGet(url,false,true,tag);
     }
     private void doGet(String murl,int tag){
-        doGet(murl, false,false, tag);
+        doGet(murl, false,true, tag);
     }
 
     private void doGet(String mUrl, final boolean isNeedToken, final boolean isNeedUa,final int mTag){
@@ -278,10 +278,8 @@ public class HttpManager {
                 conn.setRequestProperty("Authorization",
                         "Bearer "+ DoubanApi.ACCESS_TOKEN);
             }
-            if (isNeedUa) {
-                conn.setRequestProperty("User-Agent",
+            conn.setRequestProperty("User-agent",
                         USER_AGENT);
-            }
             conn.connect();
             InputStream is = conn.getInputStream();
             result = readIs(is);
